@@ -105,7 +105,7 @@ class SimCLR(object):
             # warmup for the first 10 epochs
             if epoch_counter >= 10:
                 self.scheduler.step()
-            logging.debug(f"Epoch: {epoch_counter}\tLoss: {loss}\tTop1 accuracy: {top1[0]}")
+            logging.debug(f"Epoch: {epoch_counter}\tLoss: {loss}\tCross Entropy Loss: {loss_self_super}\tReconstruction Error: {loss_autoencoder}\tTop1 accuracy: {top1[0]}")
 
         logging.info("Training has finished.")
         # save model checkpoints
