@@ -75,7 +75,7 @@ class SimCLR(object):
                 with autocast(enabled=self.args.fp16_precision):
                     features, images_hat = self.model(images)
                     logits, labels = self.info_nce_loss(features)
-                    loss_autoencoder = self.criterion_autoencoder(images_hat.to(self.device), images).view(images.size(0), -1).mean(dim=1).sum()
+                    loss_autoencoder = self.criterion_autoencoder(images_hat.to(self.args.device), images).view(images.size(0), -1).mean(dim=1).sum()
                     loss_autoencoder = loss_autoencoder / images.size(0)
                     loss_self_super = self.criterion(logits, labels)
                     if self.args.autoencoder_weight > 0.:
