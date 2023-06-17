@@ -18,7 +18,6 @@ class SimCLR(object):
         self.args = kwargs['args']
         self.model = kwargs['model'].to(self.args.device)
         self.optimizer = kwargs['optimizer']
-        self.optimizer_autoencoder = kwargs['optimizer_autoencoder']
         self.scheduler = kwargs['scheduler']
         self.writer = SummaryWriter(log_dir=kwargs['log_dir'])
         logging.basicConfig(filename=os.path.join(self.writer.log_dir, 'training.log'), level=logging.DEBUG)
