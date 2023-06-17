@@ -71,7 +71,7 @@ def main():
         train_dataset, batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=True, drop_last=True)
 
-    model = ResNetAutoencoder(encoder_block=BasicBlock, decoder_block=BasicBlockDecoder, projection_head=True, projection_head_size=128, num_classes=args.out_dim)
+    model = ResNetAutoencoder(encoder_block=BasicBlock, decoder_block=BasicBlockDecoder, projection_head=True, out_dim=args.out_dim)
 
     optimizer = torch.optim.Adam(model.parameters(), args.lr, weight_decay=args.weight_decay)
 
