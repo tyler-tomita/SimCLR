@@ -32,7 +32,7 @@ class ResNetAutoencoder(nn.Module):
 
     def forward(self, x: Tensor) -> Tensor:
         x = self.encoder(x)
-        out = self.softmax(self.fc(x))
+        out = self.fc(x)
         x = self.decoder(x)
 
         return out, x
