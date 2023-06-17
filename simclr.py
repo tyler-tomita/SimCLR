@@ -18,10 +18,12 @@ class SimCLR(object):
         self.args = kwargs['args']
         self.model = kwargs['model'].to(self.args.device)
         self.optimizer = kwargs['optimizer']
+        self.optimizer_autoencoder = kwargs['optimizer_autoencoder']
         self.scheduler = kwargs['scheduler']
-        self.writer = SummaryWriter()
+        self.writer = SummaryWriter(log_dir=kwargs['log_dir'])
         logging.basicConfig(filename=os.path.join(self.writer.log_dir, 'training.log'), level=logging.DEBUG)
         self.criterion = torch.nn.CrossEntropyLoss().to(self.args.device)
+        self.criterion_autoencoder = torch.nn.MSELoss(reduction='none').to(self.args.device)
 
     def info_nce_loss(self, features):
 
@@ -72,9 +74,15 @@ class SimCLR(object):
                 images = images.to(self.args.device)
 
                 with autocast(enabled=self.args.fp16_precision):
-                    features = self.model(images)
+                    features, images_hat = self.model(images)
                     logits, labels = self.info_nce_loss(features)
-                    loss = self.criterion(logits, labels)
+                    loss_autoencoder = self.criterion_autoencoder(images_hat.to(self.device), images).view(images.size(0), -1).mean(dim=1).sum()
+                    loss_autoencoder = loss_autoencoder / images.size(0)
+                    loss_self_super = self.criterion(logits, labels)
+                    if self.args.autoencoder_weight > 0.:
+                        loss = loss_self_super + self.args.autoencoder_weight * loss_autoencoder
+                    else:
+                        loss = loss_self_super
 
                 self.optimizer.zero_grad()
 
@@ -102,7 +110,6 @@ class SimCLR(object):
         checkpoint_name = 'checkpoint_{:04d}.pth.tar'.format(self.args.epochs)
         save_checkpoint({
             'epoch': self.args.epochs,
-            'arch': self.args.arch,
             'state_dict': self.model.state_dict(),
             'optimizer': self.optimizer.state_dict(),
         }, is_best=False, filename=os.path.join(self.writer.log_dir, checkpoint_name))
